@@ -36,12 +36,26 @@
             padding: 12px 24px;
             font-weight: bold;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-            display: none;
-            /* Se oculta por defecto */
+            /* display: none;  <-- ERROR CORREGIDO: No ocultar por defecto */
         }
 
-        /* model-viewer lo muestra automáticamente cuando AR es soportado */
-        model-viewer[ar-status="session-started"]>.ar-button {
+        /* Ocultar botón si AR no está disponible */
+        model-viewer:not([ar-status="session-started"])>.ar-button {
+            display: block;
+        }
+
+        #error {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            z-index: 100;
+        }
+
+        .hide {
             display: none;
         }
     </style>
@@ -51,37 +65,35 @@
 
     <!-- 
         Configuración de Model Viewer para AR:
-        - src: Ruta al modelo
-        - ar: Activa modo AR
-        - ar-modes: 
-            1. 'webxr': Android nativo (si disponible)
-            2. 'scene-viewer': Android alternativo
-            3. 'quick-look': iOS nativo (iPhone/iPad)
-        - camera-controls: Permite rotar/zoom con el dedo
-        - auto-rotate: El modelo gira solo (opcional)
-        - shadow-intensity: Sombras en el suelo
+        ar-scale="auto": Escala automática
+        ar-placement="floor": Colocar en suelo
     -->
     <model-viewer src="./10_2_2026.glb" poster="https://modelviewer.dev/assets/poster-astronaut.png"
         alt="Un modelo 3D de traje de museo" shadow-intensity="1" camera-controls auto-rotate ar
-        ar-modes="webxr scene-viewer quick-look" reveal="auto">
+        ar-modes="webxr scene-viewer quick-look" ar-scale="auto" ar-placement="floor" reveal="auto">
 
         <button slot="ar-button" class="ar-button">
             👋 Ver en tu espacio
         </button>
 
-        <div id="error" class="hide">AR no está soportado en este dispositivo</div>
+        <div id="error" class="hide"></div>
     </model-viewer>
 
     <script>
         const modelViewer = document.querySelector('model-viewer');
+        const errorDiv = document.querySelector("#error");
+
+        // Debug visual del estado
+        modelViewer.addEventListener('load', () => {
+            console.log("Modelo cargado");
+        });
 
         modelViewer.addEventListener('ar-status', (event) => {
+            console.log("AR Status:", event.detail.status);
             if (event.detail.status === 'failed') {
-                const error = document.querySelector("#error");
-                error.classList.remove('hide');
-                error.addEventListener('transitionend', (event) => {
-                    error.classList.add('hide');
-                });
+                errorDiv.textContent = "Error: AR falló. Verifica iOS 13+ o Android con ARCore.";
+                errorDiv.classList.remove('hide');
+                setTimeout(() => errorDiv.classList.add('hide'), 5000);
             }
         });
     </script>
