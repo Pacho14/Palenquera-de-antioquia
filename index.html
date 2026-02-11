@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Museo Trajes RA - Model Viewer</title>
+
+    <!-- Importar el componente model-viewer -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: sans-serif;
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            background-color: #404040;
+        }
+
+        /* Botón personalizado para activar AR */
+        .ar-button {
+            background-color: white;
+            border-radius: 4px;
+            border: none;
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            padding: 12px 24px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+            display: none;
+            /* Se oculta por defecto */
+        }
+
+        /* model-viewer lo muestra automáticamente cuando AR es soportado */
+        model-viewer[ar-status="session-started"]>.ar-button {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 
+        Configuración de Model Viewer para AR:
+        - src: Ruta al modelo
+        - ar: Activa modo AR
+        - ar-modes: 
+            1. 'webxr': Android nativo (si disponible)
+            2. 'scene-viewer': Android alternativo
+            3. 'quick-look': iOS nativo (iPhone/iPad)
+        - camera-controls: Permite rotar/zoom con el dedo
+        - auto-rotate: El modelo gira solo (opcional)
+        - shadow-intensity: Sombras en el suelo
+    -->
+    <model-viewer src="./10_2_2026.glb" poster="https://modelviewer.dev/assets/poster-astronaut.png"
+        alt="Un modelo 3D de traje de museo" shadow-intensity="1" camera-controls auto-rotate ar
+        ar-modes="webxr scene-viewer quick-look" reveal="auto">
+
+        <button slot="ar-button" class="ar-button">
+            👋 Ver en tu espacio
+        </button>
+
+        <div id="error" class="hide">AR no está soportado en este dispositivo</div>
+    </model-viewer>
+
+    <script>
+        const modelViewer = document.querySelector('model-viewer');
+
+        modelViewer.addEventListener('ar-status', (event) => {
+            if (event.detail.status === 'failed') {
+                const error = document.querySelector("#error");
+                error.classList.remove('hide');
+                error.addEventListener('transitionend', (event) => {
+                    error.classList.add('hide');
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
